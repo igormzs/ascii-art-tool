@@ -5,7 +5,6 @@ const dropzone = document.getElementById('upload-dropzone') as HTMLDivElement;
 const fileInput = document.getElementById('input-file') as HTMLInputElement;
 const outputContainer = document.getElementById('output-container') as HTMLDivElement;
 const outputCanvas = document.getElementById('output-canvas') as HTMLCanvasElement;
-const dropzoneContent = document.getElementById('dropzone-content') as HTMLDivElement;
 const exportControls = document.getElementById('export-controls') as HTMLDivElement;
 const btnPlayPause = document.getElementById('btn-play-pause') as HTMLButtonElement;
 const timeDisplay = document.getElementById('time-display') as HTMLSpanElement;
