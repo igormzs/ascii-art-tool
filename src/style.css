@@ -18,11 +18,11 @@
   --input-border: rgba(255, 255, 255, 0.1);
   --muted-bg: rgba(255, 255, 255, 0.03);
 
-  --primary: #52525b;
+  --primary: #71717a;
   --primary-foreground: #ffffff;
-  --primary-hover: #3f3f46;
-  --primary-subtle: rgba(82, 82, 91, 0.15);
-  --ring: rgba(82, 82, 91, 0.5);
+  --primary-hover: #52525b;
+  --primary-subtle: rgba(113, 113, 122, 0.15);
+  --ring: rgba(113, 113, 122, 0.5);
 
   --header-bg: rgba(17, 17, 19, 0.85);
   --header-border: rgba(255, 255, 255, 0.06);
