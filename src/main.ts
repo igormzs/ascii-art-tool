@@ -6,11 +6,10 @@ const fileInput = document.getElementById('input-file') as HTMLInputElement;
 const outputContainer = document.getElementById('output-container') as HTMLDivElement;
 const outputCanvas = document.getElementById('output-canvas') as HTMLCanvasElement;
 const exportControls = document.getElementById('export-controls') as HTMLDivElement;
-const btnPlayPause = document.getElementById('btn-play-pause') as HTMLButtonElement;
-const timeDisplay = document.getElementById('time-display') as HTMLSpanElement;
 const btnRecordVideo = document.getElementById('btn-record-video') as HTMLButtonElement;
 const btnDownloadVideo = document.getElementById('btn-download-video') as HTMLButtonElement;
 const textRecordStatus = document.getElementById('text-record-status') as HTMLSpanElement;
+const recordingTime = document.getElementById('recording-time') as HTMLSpanElement;
 const btnExportImage = document.getElementById('btn-export-image') as HTMLButtonElement;
 const btnCopyAscii = document.getElementById('btn-copy-ascii') as HTMLButtonElement;
 const btnCamera = document.getElementById('btn-camera') as HTMLDivElement;
@@ -27,6 +26,8 @@ let currentStream: MediaStream | null = null;
 let mediaRecorder: MediaRecorder | null = null;
 let recordedChunks: Blob[] = [];
 let isRecording = false;
+let recordingStartTime: number = 0;
+let recordingInterval: number | null = null;
 
 // Event Listeners for Camera
 btnCamera.addEventListener('click', (e) => {
@@ -96,6 +97,17 @@ function startRecording() {
     isRecording = true;
     btnRecordVideo.classList.add('recording');
     textRecordStatus.textContent = 'Stop';
+    
+    // Start timer
+    recordingStartTime = Date.now();
+    recordingTime.classList.remove('hidden');
+    recordingTime.textContent = '00:00';
+    recordingInterval = window.setInterval(() => {
+        const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+        const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const secs = (elapsed % 60).toString().padStart(2, '0');
+        recordingTime.textContent = `${mins}:${secs}`;
+    }, 1000);
 }
 
 function stopRecording() {
@@ -104,6 +116,13 @@ function stopRecording() {
         isRecording = false;
         btnRecordVideo.classList.remove('recording');
         textRecordStatus.textContent = 'Record';
+        
+        // Stop timer
+        if (recordingInterval) {
+            clearInterval(recordingInterval);
+            recordingInterval = null;
+        }
+        recordingTime.classList.add('hidden');
     }
 }
 
@@ -373,7 +392,6 @@ async function handleCamera() {
             outputContainer.classList.add('flex');
             exportControls.classList.remove('hidden');
             
-            updateTimeDisplay();
         });
     } catch (err) {
         console.error("Camera access error:", err);
@@ -411,7 +429,6 @@ function handleFile(file: File) {
             outputContainer.classList.add('flex');
             exportControls.classList.remove('hidden');
             
-            updateTimeDisplay();
         });
     } else {
         // Treat as image
@@ -452,39 +469,10 @@ function initProcessor() {
 function renderLoop() {
     if (isVideo && isPlaying && mediaElement && processor) {
         processor.processFrame(mediaElement);
-        updateTimeDisplay();
         animationFrameId = requestAnimationFrame(renderLoop);
     }
 }
 
-function updateTimeDisplay() {
-    if (isVideo && mediaElement) {
-        const vid = mediaElement as HTMLVideoElement;
-        const format = (t: number) => {
-            const m = Math.floor(t / 60);
-            const s = Math.floor(t % 60).toString().padStart(2, '0');
-            return `${m}:${s}`;
-        };
-        timeDisplay.textContent = `${format(vid.currentTime)} / ${format(vid.duration || 0)}`;
-    }
-}
-
-btnPlayPause.addEventListener('click', () => {
-    if (isVideo && mediaElement) {
-        const vid = mediaElement as HTMLVideoElement;
-        if (isPlaying) {
-            vid.pause();
-            isPlaying = false;
-            btnPlayPause.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
-            cancelAnimationFrame(animationFrameId);
-        } else {
-            vid.play();
-            isPlaying = true;
-            btnPlayPause.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
-            renderLoop();
-        }
-    }
-});
 
 // Image Export
 btnExportImage.addEventListener('click', () => {

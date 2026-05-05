@@ -85,17 +85,11 @@
                     <!-- Export Controls (Hidden initially) -->
                     <div id="export-controls" class="hidden flex items-center justify-between bg-card p-4 rounded-xl border border-border">
                         <div class="flex items-center gap-4">
-                            <div class="flex items-center gap-2">
-                                <button id="btn-play-pause" class="btn btn-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                </button>
-                                <span id="time-display" class="font-mono text-sm text-muted-foreground">0:00 / 0:00</span>
-                            </div>
-                            <div class="divider-v"></div>
                             <button id="btn-record-video" class="btn btn-record" style="padding: 0.4rem 1rem; border-radius: 9999px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
                                 <span class="record-dot"></span>
                                 <span id="text-record-status">Record</span>
                             </button>
+                            <span id="recording-time" class="hidden font-mono text-sm text-red-500" style="color: #ef4444; font-weight: 600;">00:00</span>
                         </div>
                     </div>
                 </div>
