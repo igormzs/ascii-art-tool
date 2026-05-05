@@ -82,20 +82,20 @@ function startRecording() {
     mediaRecorder.onstop = () => {
         const blob = new Blob(recordedChunks, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
-        btnDownloadVideo.onclick = () => {
+        btnDownloadVideo.onclick = (e) => {
+            e.stopPropagation();
             const a = document.createElement('a');
             a.href = url;
             a.download = `ascii-art-${Date.now()}.webm`;
             a.click();
         };
-        btnDownloadVideo.classList.remove('hidden');
+        videoExportSection.classList.remove('hidden');
     };
     
     mediaRecorder.start();
     isRecording = true;
     btnRecordVideo.classList.add('recording');
-    textRecordStatus.textContent = 'Stop Recording';
-    btnDownloadVideo.classList.add('hidden');
+    textRecordStatus.textContent = 'Stop';
 }
 
 function stopRecording() {
@@ -103,7 +103,7 @@ function stopRecording() {
         mediaRecorder.stop();
         isRecording = false;
         btnRecordVideo.classList.remove('recording');
-        textRecordStatus.textContent = 'Record Video';
+        textRecordStatus.textContent = 'Record';
     }
 }
 
@@ -336,7 +336,7 @@ function cleanupMedia() {
         currentStream.getTracks().forEach(track => track.stop());
         currentStream = null;
     }
-    btnDownloadVideo.classList.add('hidden');
+    videoExportSection.classList.add('hidden');
 }
 
 async function handleCamera() {
@@ -353,7 +353,6 @@ async function handleCamera() {
         currentStream = stream;
         
         isVideo = true;
-        videoExportSection.classList.remove('hidden');
         
         const video = document.createElement('video');
         video.srcObject = stream;
@@ -393,7 +392,6 @@ function handleFile(file: File) {
     
     if (file.type.startsWith('video/')) {
         isVideo = true;
-        videoExportSection.classList.remove('hidden');
         const video = document.createElement('video');
         video.src = url;
         video.loop = true;

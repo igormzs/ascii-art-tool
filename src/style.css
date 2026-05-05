@@ -346,6 +346,12 @@ body {
 .cursor-pointer:hover {
   text-decoration: underline;
 }
+.divider-v {
+  width: 1px;
+  height: 1.5rem;
+  background-color: var(--border);
+  margin: 0 0.5rem;
+}
 .icon-divider {
   width: 2rem;
   height: 1px;
