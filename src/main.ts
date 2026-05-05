@@ -12,9 +12,9 @@ const btnExport = document.getElementById('btn-export') as HTMLButtonElement;
 const btnExportSidebar = document.getElementById('btn-export-video-sidebar') as HTMLButtonElement;
 const btnExportImage = document.getElementById('btn-export-image') as HTMLButtonElement;
 const btnCopyAscii = document.getElementById('btn-copy-ascii') as HTMLButtonElement;
+const btnCamera = document.getElementById('btn-camera') as HTMLDivElement;
+const textUseCamera = document.getElementById('text-use-camera') as HTMLSpanElement;
 const videoExportSection = document.getElementById('video-export-section') as HTMLDivElement;
-
-// Settings panels are now individual <details> elements — no global toggle needed.
 
 // App State
 let mediaElement: HTMLImageElement | HTMLVideoElement | null = null;
@@ -22,6 +22,29 @@ let isVideo = false;
 let isPlaying = false;
 let animationFrameId: number;
 let processor: AsciiProcessor | null = null;
+let currentStream: MediaStream | null = null;
+
+// Event Listeners for Camera
+btnCamera.addEventListener('click', (e) => {
+    e.stopPropagation();
+    handleCamera();
+});
+textUseCamera.addEventListener('click', (e) => {
+    e.stopPropagation();
+    handleCamera();
+});
+
+// Logo Reset handler
+const logo = document.querySelector('.logo') as HTMLDivElement;
+logo.addEventListener('click', () => {
+    cleanupMedia();
+    mediaElement = null;
+    dropzone.classList.remove('hidden');
+    outputContainer.classList.add('hidden');
+    outputContainer.classList.remove('flex');
+    exportControls.classList.add('hidden');
+    videoExportSection.classList.add('hidden');
+});
 
 // Default Options
 let currentOptions: AsciiOptions = {
@@ -243,15 +266,65 @@ fileInput.addEventListener('change', () => {
     }
 });
 
-function handleFile(file: File) {
-    console.log("Handling file:", file.name, file.type);
-    const url = URL.createObjectURL(file);
-    
-    // Cleanup previous
+function cleanupMedia() {
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
     if (mediaElement && isVideo) {
         (mediaElement as HTMLVideoElement).pause();
     }
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+        currentStream = null;
+    }
+}
+
+async function handleCamera() {
+    console.log("Requesting camera access...");
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        });
+        
+        cleanupMedia();
+        currentStream = stream;
+        
+        isVideo = true;
+        videoExportSection.classList.remove('hidden');
+        
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.muted = true;
+        video.playsInline = true;
+        
+        video.addEventListener('loadeddata', () => {
+            console.log("Camera stream loaded");
+            mediaElement = video;
+            initProcessor();
+            video.play();
+            isPlaying = true;
+            renderLoop();
+            
+            // Show UI
+            dropzone.classList.add('hidden');
+            outputContainer.classList.remove('hidden');
+            outputContainer.classList.add('flex');
+            exportControls.classList.remove('hidden');
+            
+            updateTimeDisplay();
+        });
+    } catch (err) {
+        console.error("Camera access error:", err);
+        alert("Camera access was denied or is not available. Please check your browser permissions.");
+    }
+}
+
+function handleFile(file: File) {
+    console.log("Handling file:", file.name, file.type);
+    const url = URL.createObjectURL(file);
+    
+    cleanupMedia();
     
     isVideo = false;
     videoExportSection.classList.add('hidden');
