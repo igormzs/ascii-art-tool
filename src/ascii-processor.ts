@@ -174,6 +174,56 @@ export class AsciiProcessor {
         }
     }
 
+    public getAsciiString(imageSource: HTMLImageElement | HTMLVideoElement): string {
+        const { width, height } = this.calculateDimensions(imageSource);
+        const charWidth = this.options.fontSize * 0.6;
+        const charHeight = this.options.fontSize;
+        const cols = Math.floor(width / charWidth);
+        const rows = Math.floor(height / charHeight);
+
+        this.offscreenCanvas.width = cols;
+        this.offscreenCanvas.height = rows;
+        this.offscreenCtx.drawImage(imageSource, 0, 0, cols, rows);
+        const imageData = this.offscreenCtx.getImageData(0, 0, cols, rows);
+        const pixels = imageData.data;
+
+        const charList = this.options.chars;
+        const charLen = charList.length;
+        const contrastFactor = (259 * (this.options.contrast + 255)) / (255 * (259 - this.options.contrast));
+
+        let result = "";
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+                const i = (y * cols + x) * 4;
+                let r = pixels[i];
+                let g = pixels[i + 1];
+                let b = pixels[i + 2];
+
+                r += this.options.brightness - 100;
+                g += this.options.brightness - 100;
+                b += this.options.brightness - 100;
+                r = contrastFactor * (r - 128) + 128;
+                g = contrastFactor * (g - 128) + 128;
+                b = contrastFactor * (b - 128) + 128;
+                r = Math.max(0, Math.min(255, r));
+                g = Math.max(0, Math.min(255, g));
+                b = Math.max(0, Math.min(255, b));
+                r = 255 * Math.pow(r / 255, 1 / this.options.gamma);
+                g = 255 * Math.pow(g / 255, 1 / this.options.gamma);
+                b = 255 * Math.pow(b / 255, 1 / this.options.gamma);
+
+                let lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                if (this.options.invert) lum = 255 - lum;
+
+                const charIndex = Math.floor((1 - lum / 255) * (charLen - 1));
+                const clampedIndex = Math.max(0, Math.min(charLen - 1, charIndex));
+                result += charList[clampedIndex];
+            }
+            result += "\n";
+        }
+        return result;
+    }
+
     private calculateDimensions(source: HTMLImageElement | HTMLVideoElement) {
         let sourceWidth, sourceHeight;
         

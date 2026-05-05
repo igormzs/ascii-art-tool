@@ -10,6 +10,10 @@ const exportControls = document.getElementById('export-controls') as HTMLDivElem
 const btnPlayPause = document.getElementById('btn-play-pause') as HTMLButtonElement;
 const timeDisplay = document.getElementById('time-display') as HTMLSpanElement;
 const btnExport = document.getElementById('btn-export') as HTMLButtonElement;
+const btnExportSidebar = document.getElementById('btn-export-video-sidebar') as HTMLButtonElement;
+const btnExportImage = document.getElementById('btn-export-image') as HTMLButtonElement;
+const btnCopyAscii = document.getElementById('btn-copy-ascii') as HTMLButtonElement;
+const videoExportSection = document.getElementById('video-export-section') as HTMLDivElement;
 
 // Settings panels are now individual <details> elements — no global toggle needed.
 
@@ -71,6 +75,7 @@ const modeBtns = document.querySelectorAll('.mode-btn');
 
 function updateOptions(updates: Partial<AsciiOptions>) {
     currentOptions = { ...currentOptions, ...updates };
+
     if (processor && mediaElement) {
         processor.setOptions(currentOptions);
         if (!isVideo || !isPlaying) {
@@ -210,6 +215,10 @@ dropzone.addEventListener('click', () => {
     fileInput.click();
 });
 
+outputContainer.addEventListener('click', () => {
+    fileInput.click();
+});
+
 dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
     dropzone.style.borderColor = 'var(--primary)';
@@ -245,8 +254,12 @@ function handleFile(file: File) {
         (mediaElement as HTMLVideoElement).pause();
     }
     
+    isVideo = false;
+    videoExportSection.classList.add('hidden');
+    
     if (file.type.startsWith('video/')) {
         isVideo = true;
+        videoExportSection.classList.remove('hidden');
         const video = document.createElement('video');
         video.src = url;
         video.loop = true;
@@ -261,8 +274,9 @@ function handleFile(file: File) {
             renderLoop();
             
             // Show UI
-            dropzoneContent.classList.add('hidden');
+            dropzone.classList.add('hidden');
             outputContainer.classList.remove('hidden');
+            outputContainer.classList.add('flex');
             exportControls.classList.remove('hidden');
             
             updateTimeDisplay();
@@ -285,8 +299,9 @@ function handleFile(file: File) {
             }
             
             // Show UI
-            dropzoneContent.classList.add('hidden');
+            dropzone.classList.add('hidden');
             outputContainer.classList.remove('hidden');
+            outputContainer.classList.add('flex');
             exportControls.classList.add('hidden'); // No export for images for now
         };
         img.onerror = () => {
@@ -340,7 +355,32 @@ btnPlayPause.addEventListener('click', () => {
 });
 
 // Video Export Logic
-btnExport.addEventListener('click', async () => {
+btnExport.addEventListener('click', startVideoExport);
+btnExportSidebar.addEventListener('click', startVideoExport);
+
+btnExportImage.addEventListener('click', () => {
+    if (!outputCanvas) return;
+    const link = document.createElement('a');
+    link.download = `ascii-art-${Date.now()}.png`;
+    link.href = outputCanvas.toDataURL('image/png');
+    link.click();
+});
+
+btnCopyAscii.addEventListener('click', () => {
+    if (!processor || !mediaElement) return;
+    const text = processor.getAsciiString(mediaElement);
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = btnCopyAscii.textContent;
+        btnCopyAscii.textContent = "Copied!";
+        btnCopyAscii.classList.add('btn-success');
+        setTimeout(() => {
+            btnCopyAscii.textContent = originalText;
+            btnCopyAscii.classList.remove('btn-success');
+        }, 2000);
+    });
+});
+
+async function startVideoExport() {
     if (!isVideo || !mediaElement) return;
     
     const vid = mediaElement as HTMLVideoElement;
@@ -402,4 +442,4 @@ btnExport.addEventListener('click', async () => {
     };
     
     exportLoop();
-});
+}
