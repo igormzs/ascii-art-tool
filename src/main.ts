@@ -13,6 +13,7 @@ const recordingTime = document.getElementById('recording-time') as HTMLSpanEleme
 const btnExportImage = document.getElementById('btn-export-image') as HTMLButtonElement;
 const btnCopyAscii = document.getElementById('btn-copy-ascii') as HTMLButtonElement;
 const btnCamera = document.getElementById('btn-camera') as HTMLDivElement;
+const btnUploadTrigger = document.getElementById('btn-upload-trigger') as HTMLDivElement;
 const textUseCamera = document.getElementById('text-use-camera') as HTMLSpanElement;
 const videoExportSection = document.getElementById('video-export-section') as HTMLDivElement;
 
@@ -34,10 +35,21 @@ btnCamera.addEventListener('click', (e) => {
     e.stopPropagation();
     handleCamera();
 });
-textUseCamera.addEventListener('click', (e) => {
-    e.stopPropagation();
-    handleCamera();
-});
+
+// Upload trigger listener
+if (btnUploadTrigger) {
+    btnUploadTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fileInput.click();
+    });
+}
+
+if (textUseCamera) {
+    textUseCamera.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleCamera();
+    });
+}
 
 // Logo Reset handler
 const logo = document.querySelector('.logo') as HTMLDivElement;
@@ -374,25 +386,32 @@ async function handleCamera() {
         isVideo = true;
         
         const video = document.createElement('video');
-        video.srcObject = stream;
+        video.setAttribute('autoplay', '');
+        video.setAttribute('muted', '');
+        video.setAttribute('playsinline', '');
         video.muted = true;
         video.playsInline = true;
+        video.autoplay = true;
+        video.srcObject = stream;
         
-        video.addEventListener('loadeddata', () => {
-            console.log("Camera stream loaded");
+        video.onloadedmetadata = () => {
+            console.log("Camera metadata loaded", video.videoWidth, video.videoHeight);
             mediaElement = video;
             initProcessor();
-            video.play();
-            isPlaying = true;
-            renderLoop();
-            
-            // Show UI
-            dropzone.classList.add('hidden');
-            outputContainer.classList.remove('hidden');
-            outputContainer.classList.add('flex');
-            exportControls.classList.remove('hidden');
-            
-        });
+            video.play().then(() => {
+                console.log("Camera playback started");
+                isPlaying = true;
+                renderLoop();
+                
+                // Show UI
+                dropzone.classList.add('hidden');
+                outputContainer.classList.remove('hidden');
+                outputContainer.classList.add('flex');
+                exportControls.classList.remove('hidden');
+            }).catch(err => {
+                console.error("Video play error:", err);
+            });
+        };
     } catch (err) {
         console.error("Camera access error:", err);
         alert("Camera access was denied or is not available. Please check your browser permissions.");
