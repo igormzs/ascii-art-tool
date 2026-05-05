@@ -488,10 +488,7 @@ btnPlayPause.addEventListener('click', () => {
     }
 });
 
-// Video Export Logic
-btnExport.addEventListener('click', startVideoExport);
-btnExportSidebar.addEventListener('click', startVideoExport);
-
+// Image Export
 btnExportImage.addEventListener('click', () => {
     if (!outputCanvas) return;
     const link = document.createElement('a');
@@ -513,67 +510,3 @@ btnCopyAscii.addEventListener('click', () => {
         }, 2000);
     });
 });
-
-async function startVideoExport() {
-    if (!isVideo || !mediaElement) return;
-    
-    const vid = mediaElement as HTMLVideoElement;
-    const stream = outputCanvas.captureStream(30); // 30 fps
-    
-    let options = { mimeType: 'video/webm;codecs=vp9' };
-    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options = { mimeType: 'video/webm;codecs=vp8' };
-    }
-    
-    const mediaRecorder = new MediaRecorder(stream, options);
-    const chunks: Blob[] = [];
-    
-    mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data);
-    };
-    
-    mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `ascii-export-${Date.now()}.webm`;
-        a.click();
-        
-        btnExport.textContent = 'Export Video';
-        btnExport.disabled = false;
-        
-        // Restore loop
-        vid.loop = true;
-        vid.play();
-        isPlaying = true;
-        renderLoop();
-    };
-
-    // Pause normal playback to record
-    cancelAnimationFrame(animationFrameId);
-    vid.pause();
-    
-    btnExport.textContent = 'Exporting...';
-    btnExport.disabled = true;
-    
-    // Start recording from beginning
-    vid.currentTime = 0;
-    vid.loop = false; // Stop at end
-    
-    await new Promise(resolve => setTimeout(resolve, 500)); // wait for seek
-    
-    vid.play();
-    mediaRecorder.start();
-    
-    const exportLoop = () => {
-        processor!.processFrame(vid);
-        if (!vid.ended) {
-            requestAnimationFrame(exportLoop);
-        } else {
-            mediaRecorder.stop();
-        }
-    };
-    
-    exportLoop();
-}
