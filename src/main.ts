@@ -8,8 +8,9 @@ const outputCanvas = document.getElementById('output-canvas') as HTMLCanvasEleme
 const exportControls = document.getElementById('export-controls') as HTMLDivElement;
 const btnPlayPause = document.getElementById('btn-play-pause') as HTMLButtonElement;
 const timeDisplay = document.getElementById('time-display') as HTMLSpanElement;
-const btnExport = document.getElementById('btn-export') as HTMLButtonElement;
-const btnExportSidebar = document.getElementById('btn-export-video-sidebar') as HTMLButtonElement;
+const btnRecordVideo = document.getElementById('btn-record-video') as HTMLButtonElement;
+const btnDownloadVideo = document.getElementById('btn-download-video') as HTMLButtonElement;
+const textRecordStatus = document.getElementById('text-record-status') as HTMLSpanElement;
 const btnExportImage = document.getElementById('btn-export-image') as HTMLButtonElement;
 const btnCopyAscii = document.getElementById('btn-copy-ascii') as HTMLButtonElement;
 const btnCamera = document.getElementById('btn-camera') as HTMLDivElement;
@@ -23,6 +24,9 @@ let isPlaying = false;
 let animationFrameId: number;
 let processor: AsciiProcessor | null = null;
 let currentStream: MediaStream | null = null;
+let mediaRecorder: MediaRecorder | null = null;
+let recordedChunks: Blob[] = [];
+let isRecording = false;
 
 // Event Listeners for Camera
 btnCamera.addEventListener('click', (e) => {
@@ -44,7 +48,64 @@ logo.addEventListener('click', () => {
     outputContainer.classList.remove('flex');
     exportControls.classList.add('hidden');
     videoExportSection.classList.add('hidden');
+    stopRecording();
 });
+
+// Recording Logic
+btnRecordVideo.addEventListener('click', () => {
+    if (!isRecording) {
+        startRecording();
+    } else {
+        stopRecording();
+    }
+});
+
+function startRecording() {
+    recordedChunks = [];
+    const stream = outputCanvas.captureStream(30);
+    
+    try {
+        mediaRecorder = new MediaRecorder(stream, {
+            mimeType: 'video/webm;codecs=vp9'
+        });
+    } catch (e) {
+        // Fallback for browsers that don't support vp9
+        mediaRecorder = new MediaRecorder(stream);
+    }
+    
+    mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+            recordedChunks.push(e.data);
+        }
+    };
+    
+    mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        btnDownloadVideo.onclick = () => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ascii-art-${Date.now()}.webm`;
+            a.click();
+        };
+        btnDownloadVideo.classList.remove('hidden');
+    };
+    
+    mediaRecorder.start();
+    isRecording = true;
+    btnRecordVideo.classList.add('recording');
+    textRecordStatus.textContent = 'Stop Recording';
+    btnDownloadVideo.classList.add('hidden');
+}
+
+function stopRecording() {
+    if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        btnRecordVideo.classList.remove('recording');
+        textRecordStatus.textContent = 'Record Video';
+    }
+}
 
 // Default Options
 let currentOptions: AsciiOptions = {
@@ -275,6 +336,7 @@ function cleanupMedia() {
         currentStream.getTracks().forEach(track => track.stop());
         currentStream = null;
     }
+    btnDownloadVideo.classList.add('hidden');
 }
 
 async function handleCamera() {

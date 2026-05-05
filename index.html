@@ -90,7 +90,6 @@
                             </button>
                             <span id="time-display" class="font-mono text-sm text-muted-foreground">0:00 / 0:00</span>
                         </div>
-                        <button id="btn-export" class="btn btn-primary">Export Video</button>
                     </div>
                 </div>
 
@@ -341,8 +340,12 @@
                                     <p class="hint-text" style="font-size: 0.75rem; color: var(--foreground-muted); margin-top: 0.25rem;">Save current frame as PNG</p>
                                 </div>
                                 <div id="video-export-section" class="hidden">
-                                    <button id="btn-export-video-sidebar" class="btn btn-primary w-full" style="width: 100%;">Export Video</button>
-                                    <p class="hint-text" style="font-size: 0.75rem; color: var(--foreground-muted); margin-top: 0.25rem;">Generate .webm animation</p>
+                                    <button id="btn-record-video" class="btn btn-record w-full" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                        <span class="record-dot"></span>
+                                        <span id="text-record-status">Record Video</span>
+                                    </button>
+                                    <button id="btn-download-video" class="btn btn-primary w-full hidden" style="width: 100%; margin-top: 0.75rem;">Download Recorded Video</button>
+                                    <p class="hint-text" style="font-size: 0.75rem; color: var(--foreground-muted); margin-top: 0.5rem;">Capture the ASCII animation as a .webm video.</p>
                                 </div>
                                 <div>
                                     <button id="btn-copy-ascii" class="btn btn-chip w-full" style="width: 100%;">Copy ASCII Text</button>

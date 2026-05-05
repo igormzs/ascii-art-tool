@@ -65,6 +65,35 @@
   --toggle-track: rgba(0, 0, 0, 0.06);
 }
 
+/* Recording Button */
+.btn-record {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+}
+.btn-record:hover {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  border-color: #ef4444 !important;
+}
+.btn-record.recording {
+  background-color: #ef4444 !important;
+  color: white !important;
+  animation: pulse-red 2s infinite;
+}
+
+.record-dot {
+  width: 8px;
+  height: 8px;
+  background-color: currentColor;
+  border-radius: 50%;
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
 /* ===========================
    RESET
    =========================== */
