@@ -145,7 +145,9 @@ let currentOptions: AsciiOptions = {
     fontWeight: '400',
     fontSize: 8,
     bgColor: '#000000',
+    bgOpacity: 100,
     textColor: '#00ff41',
+    textOpacity: 100,
     brightness: 100,
     contrast: 100,
     gamma: 1.0,
@@ -156,6 +158,8 @@ let currentOptions: AsciiOptions = {
     customBgBw: false,
     renderMode: 'ascii'
 };
+
+let exportFormat: 'png' | 'jpeg' = 'png';
 
 // UI Bindings
 const inputChars = document.getElementById('input-chars') as HTMLTextAreaElement;
@@ -183,6 +187,13 @@ const btnClearBg = document.getElementById('btn-clear-bg') as HTMLButtonElement;
 const customBgControls = document.getElementById('custom-bg-controls') as HTMLDivElement;
 const sliderBgOpacity = document.getElementById('slider-bg-opacity') as HTMLInputElement;
 const valBgOpacity = document.getElementById('val-bg-opacity') as HTMLSpanElement;
+const sliderBgOpacityMain = document.getElementById('slider-bg-opacity-main') as HTMLInputElement;
+const valBgOpacityMain = document.getElementById('val-bg-opacity-main') as HTMLSpanElement;
+const sliderTextOpacity = document.getElementById('slider-text-opacity') as HTMLInputElement;
+const valTextOpacity = document.getElementById('val-text-opacity') as HTMLSpanElement;
+const btnDownloadTrigger = document.getElementById('btn-download-trigger') as HTMLButtonElement;
+const downloadDropdown = document.getElementById('download-dropdown') as HTMLDivElement;
+const dropdownItems = document.querySelectorAll('.dropdown-item');
 const toggleBgBw = document.getElementById('toggle-bg-bw') as HTMLInputElement;
 const resetBtns = document.querySelectorAll('.btn-reset');
 const modeBtns = document.querySelectorAll('.mode-btn');
@@ -308,6 +319,38 @@ sliderBgOpacity.addEventListener('input', (e) => {
     const val = parseInt((e.target as HTMLInputElement).value, 10);
     valBgOpacity.textContent = `${val}%`;
     updateOptions({ customBgOpacity: val });
+});
+
+sliderBgOpacityMain.addEventListener('input', (e) => {
+    const val = parseInt((e.target as HTMLInputElement).value, 10);
+    valBgOpacityMain.textContent = `${val}%`;
+    updateOptions({ bgOpacity: val });
+});
+
+sliderTextOpacity.addEventListener('input', (e) => {
+    const val = parseInt((e.target as HTMLInputElement).value, 10);
+    valTextOpacity.textContent = `${val}%`;
+    updateOptions({ textOpacity: val });
+});
+
+// Download Dropdown Logic
+btnDownloadTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    downloadDropdown.classList.toggle('hidden');
+});
+
+document.addEventListener('click', () => {
+    downloadDropdown.classList.add('hidden');
+});
+
+dropdownItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+        const format = (e.currentTarget as HTMLButtonElement).getAttribute('data-format') as 'png' | 'jpeg';
+        if (format) {
+            exportImage(format);
+        }
+        downloadDropdown.classList.add('hidden');
+    });
 });
 
 toggleBgBw.addEventListener('change', (e) => updateOptions({ customBgBw: (e.target as HTMLInputElement).checked }));
@@ -494,13 +537,19 @@ function renderLoop() {
 
 
 // Image Export
-btnExportImage.addEventListener('click', () => {
+function exportImage(format: 'png' | 'jpeg') {
     if (!outputCanvas) return;
     const link = document.createElement('a');
-    link.download = `ascii-art-${Date.now()}.png`;
-    link.href = outputCanvas.toDataURL('image/png');
+    const extension = format === 'png' ? 'png' : 'jpg';
+    link.download = `ascii-art-${Date.now()}.${extension}`;
+    
+    if (format === 'png') {
+        link.href = outputCanvas.toDataURL('image/png');
+    } else {
+        link.href = outputCanvas.toDataURL('image/jpeg', 0.9);
+    }
     link.click();
-});
+}
 
 btnCopyAscii.addEventListener('click', () => {
     if (!processor || !mediaElement) return;

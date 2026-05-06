@@ -4,7 +4,9 @@ export interface AsciiOptions {
     fontWeight: string;
     fontSize: number;
     bgColor: string;
+    bgOpacity: number;
     textColor: string;
+    textOpacity: number;
     brightness: number;
     contrast: number;
     gamma: number;
@@ -65,7 +67,8 @@ export class AsciiProcessor {
         const pixels = imageData.data;
         
         // Prepare output canvas
-        this.ctx.fillStyle = this.options.bgColor;
+        this.ctx.clearRect(0, 0, width, height); // Clear first for transparency
+        this.ctx.fillStyle = this.hexToRgba(this.options.bgColor, this.options.bgOpacity / 100);
         this.ctx.fillRect(0, 0, width, height);
 
         if (this.options.customBgImage) {
@@ -80,6 +83,7 @@ export class AsciiProcessor {
             this.ctx.drawImage(imageSource, 0, 0, width, height);
         }
         
+        this.ctx.globalAlpha = this.options.textOpacity / 100;
         this.ctx.fillStyle = this.options.textColor;
         this.ctx.font = `${this.options.fontWeight} ${this.options.fontSize}px ${this.options.fontFamily}`;
         this.ctx.textBaseline = 'top';
@@ -172,6 +176,14 @@ export class AsciiProcessor {
                 }
             }
         }
+        this.ctx.globalAlpha = 1.0;
+    }
+
+    private hexToRgba(hex: string, alpha: number): string {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     public getAsciiString(imageSource: HTMLImageElement | HTMLVideoElement): string {

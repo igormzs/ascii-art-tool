@@ -223,7 +223,29 @@
                                 </div>
                             </div>
 
-                            <div class="flex gap-2 flex-wrap" style="margin-top: 0.75rem;">
+                            <div class="slider-group" style="margin-top: 0.75rem;">
+                                <div class="slider-header">
+                                    <label class="sub-label">Background Opacity</label>
+                                    <div class="flex items-center gap-1.5">
+                                        <span id="val-bg-opacity-main" class="val-display">100%</span>
+                                        <button class="btn-reset" data-target="slider-bg-opacity-main" data-default="100">reset</button>
+                                    </div>
+                                </div>
+                                <input type="range" id="slider-bg-opacity-main" min="0" max="100" value="100" class="slider">
+                            </div>
+
+                            <div class="slider-group" style="margin-top: 0.75rem;">
+                                <div class="slider-header">
+                                    <label class="sub-label">Text / Chars Opacity</label>
+                                    <div class="flex items-center gap-1.5">
+                                        <span id="val-text-opacity" class="val-display">100%</span>
+                                        <button class="btn-reset" data-target="slider-text-opacity" data-default="100">reset</button>
+                                    </div>
+                                </div>
+                                <input type="range" id="slider-text-opacity" min="0" max="100" value="100" class="slider">
+                            </div>
+
+                            <div class="flex gap-2 flex-wrap" style="margin-top: 1rem;">
                                 <button class="theme-btn" data-bg="#000000" data-text="#00ff41" style="background: rgb(0, 0, 0); color: rgb(0, 255, 65);">Matrix</button>
                                 <button class="theme-btn" data-bg="#0a0800" data-text="#ffb000" style="background: rgb(10, 8, 0); color: rgb(255, 176, 0);">Amber</button>
                                 <button class="theme-btn" data-bg="#ffffff" data-text="#1a1a1a" style="background: rgb(255, 255, 255); color: rgb(26, 26, 26);">White</button>
@@ -338,15 +360,19 @@
                         <summary class="filter-summary">
                             <span class="filter-title-group">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
-                                Export & Share
+                                Export
                             </span>
                             <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
                         </summary>
                         <div class="filter-body">
                             <div class="slider-group" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                                <div>
-                                    <button id="btn-export-image" class="btn btn-primary w-full" style="width: 100%;">Download Image</button>
-                                    <p class="hint-text" style="font-size: 0.75rem; color: var(--foreground-muted); margin-top: 0.25rem;">Save current frame as PNG</p>
+                                <div class="download-dropdown-container">
+                                    <p class="hint-text" style="font-size: 0.75rem; color: var(--foreground-muted); margin-bottom: 0.5rem;">Save current frame</p>
+                                    <button id="btn-download-trigger" class="btn btn-primary w-full" style="width: 100%;">Download</button>
+                                    <div id="download-dropdown" class="download-dropdown hidden">
+                                        <button class="dropdown-item" data-format="png">as .png (Transparent)</button>
+                                        <button class="dropdown-item" data-format="jpeg">as .jpeg (Solid)</button>
+                                    </div>
                                 </div>
                                 <div id="video-export-section" class="hidden">
                                     <button id="btn-download-video" class="btn btn-primary w-full" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
@@ -356,8 +382,8 @@
                                     <p class="hint-text" style="font-size: 0.75rem; color: var(--foreground-muted); margin-top: 0.5rem;">Your recording is ready for export.</p>
                                 </div>
                                 <div>
+                                    <p class="hint-text" style="font-size: 0.75rem; color: var(--foreground-muted); margin-bottom: 0.5rem;">Copy raw text to clipboard</p>
                                     <button id="btn-copy-ascii" class="btn btn-chip w-full" style="width: 100%;">Copy ASCII Text</button>
-                                    <p class="hint-text" style="font-size: 0.75rem; color: var(--foreground-muted); margin-top: 0.25rem;">Copy raw text to clipboard</p>
                                 </div>
                             </div>
                         </div>
