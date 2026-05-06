@@ -10,7 +10,6 @@ const btnRecordVideo = document.getElementById('btn-record-video') as HTMLButton
 const btnDownloadVideo = document.getElementById('btn-download-video') as HTMLButtonElement;
 const textRecordStatus = document.getElementById('text-record-status') as HTMLSpanElement;
 const recordingTime = document.getElementById('recording-time') as HTMLSpanElement;
-const btnExportImage = document.getElementById('btn-export-image') as HTMLButtonElement;
 const btnCopyAscii = document.getElementById('btn-copy-ascii') as HTMLButtonElement;
 const btnCamera = document.getElementById('btn-camera') as HTMLDivElement;
 const btnUploadTrigger = document.getElementById('btn-upload-trigger') as HTMLDivElement;
@@ -159,7 +158,6 @@ let currentOptions: AsciiOptions = {
     renderMode: 'ascii'
 };
 
-let exportFormat: 'png' | 'jpeg' = 'png';
 
 // UI Bindings
 const inputChars = document.getElementById('input-chars') as HTMLTextAreaElement;
